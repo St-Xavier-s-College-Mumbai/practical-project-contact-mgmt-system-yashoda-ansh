@@ -3,19 +3,43 @@
 #include <string.h>
 
 #define MAX_CONTACTS 100
+#define FILENAME "contacts.txt"
 
-// Structure to store contact details
-typedef struct {
+typedef struct {       
     char name[50];
     char phone[15];
     char email[50];
 } Contact;
 
-// Global array to store contacts
 Contact contacts[MAX_CONTACTS];
 int contactCount = 0;
 
-// Function to add a new contact
+void loadContacts() {        
+    FILE *file = fopen(FILENAME, "r");
+    if (file == NULL) {
+        printf("No previous contacts found. Starting fresh.\n");
+        return;
+    }
+
+    while (fscanf(file, "%s %s %s", contacts[contactCount].name, contacts[contactCount].phone, contacts[contactCount].email) != EOF) {
+        contactCount++;
+    }
+    fclose(file);
+}
+
+void saveContacts() {
+    FILE *file = fopen(FILENAME, "w");
+    if (file == NULL) {
+        printf("Error opening file to save contacts!\n");
+        return;
+    }
+
+    for (int i = 0; i < contactCount; i++) {
+        fprintf(file, "%s %s %s\n", contacts[i].name, contacts[i].phone, contacts[i].email);
+    }
+    fclose(file);
+}
+
 void addContact() {
     if (contactCount < MAX_CONTACTS) {
         printf("Enter Name: ");
@@ -25,13 +49,13 @@ void addContact() {
         printf("Enter Email: ");
         scanf("%s", contacts[contactCount].email);
         contactCount++;
+        saveContacts();
         printf("Contact added successfully!\n");
     } else {
         printf("Contact list is full!\n");
     }
 }
 
-// Function to display all contacts
 void displayContacts() {
     if (contactCount == 0) {
         printf("No contacts available.\n");
@@ -46,7 +70,6 @@ void displayContacts() {
     }
 }
 
-// Function to search for a contact by name
 void searchContact() {
     char name[50];
     printf("Enter name to search: ");
@@ -67,7 +90,6 @@ void searchContact() {
     }
 }
 
-// Function to update contact details by name
 void updateContact() {
     char name[50];
     printf("Enter the name of the contact to update: ");
@@ -80,6 +102,7 @@ void updateContact() {
             scanf("%s", contacts[i].phone);
             printf("Enter new email: ");
             scanf("%s", contacts[i].email);
+            saveContacts();
             printf("Contact updated successfully!\n");
             found = 1;
             break;
@@ -90,7 +113,6 @@ void updateContact() {
     }
 }
 
-// Function to delete a contact by name
 void deleteContact() {
     char name[50];
     printf("Enter the name of the contact to delete: ");
@@ -103,6 +125,7 @@ void deleteContact() {
                 contacts[j] = contacts[j + 1];
             }
             contactCount--;
+            saveContacts();
             printf("Contact deleted successfully!\n");
             break;
         }
@@ -112,11 +135,10 @@ void deleteContact() {
     }
 }
 
-// Main menu function
 void menu() {
     int choice;
     do {
-        printf("\n*** CONTACT MANAGEMENT SYSTEM ***\n");
+        printf("\n***** CONTACT MANAGEMENT SYSTEM *****\n");
         printf("1. Add Contact\n");
         printf("2. Display Contacts\n");
         printf("3. Search Contact\n");
@@ -152,6 +174,7 @@ void menu() {
 }
 
 int main() {
+    loadContacts();
     menu();
     return 0;
 }
